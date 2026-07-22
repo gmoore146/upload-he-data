@@ -1,11 +1,17 @@
 [project]
-name = "upload-data"
+name = "upload-he-data"
 version = "0.1.0"
-description = "Add your description here"
+description = "Auto-sorts He Pycnometer outputs into designated WNxyz folders on SharePoint/OneDrive."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "dotenv>=0.9.9",
-    "python-dotenv>=1.2.2",
+    "python-dotenv>=1.0.0",
     "watchdog>=6.0.0",
 ]
+
+[project.scripts]
+upload-he-data = "upload_he_data.main:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
