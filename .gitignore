@@ -22,3 +22,6 @@ Desktop.ini
 # IDEs & Editors
 .vscode/
 .idea/
+
+# MAC files
+.DS_Store
