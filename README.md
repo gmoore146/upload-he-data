@@ -13,13 +13,26 @@ Automated background service to monitor incoming He Pycnometer lab outputs and o
 
 ## Setup Instructions
 
-### 1. Clone the repository
+### 1. Download the repository
+
+**Option A: Manual Download (If Git is not installed)**
+1. Open a web browser on the lab PC and go to: `https://github.com/gmoore146/upload-he-data`
+2. Click the green **Code** button and select **Download ZIP**.
+3. Extract the downloaded ZIP file.
+4. Move the extracted files to create the folder: `C:\Users\leco\Documents\Pycnometer\upload-he-data`.
+5. Open Command Prompt and navigate to the folder:
+```cmd
+cd C:\Users\leco\Documents\Pycnometer\upload-he-data
+```
+
+**Option B: Using Git**
 Open Command Prompt and clone the project to the lab PC:
 ```cmd
 cd C:\Users\leco\Documents\Pycnometer
-git clone <your-github-repo-url> upload-he-data
+git clone [https://github.com/gmoore146/upload-he-data.git](https://github.com/gmoore146/upload-he-data.git) upload-he-data
 cd upload-he-data
 ```
+
 *(Note: We run this as a standalone script using `uv`'s inline dependencies, so running `uv sync` or building a virtual environment is not required).*
 
 ### 2. Configure Local Environment Variables
@@ -67,12 +80,7 @@ To run the script quietly in the background every time the PC is logged into:
 When new changes are made to the code on GitHub, follow these steps on the lab PC to update:
 
 1. Double-click your **Stop_Sorter.bat** on the desktop to kill the current background process.
-2. Open Command Prompt and navigate to the project folder:
-```cmd
-cd C:\Users\leco\Documents\Pycnometer\upload-he-data
-```
-3. Download the latest code:
-```cmd
-git pull
-```
-4. Double-click your **Start_Sorter.bat** to restart the background script with the new code.
+2. Update the files:
+   * **If using Manual Download:** Download the new ZIP from `https://github.com/gmoore146/upload-he-data`, extract it, and replace the old `main.py` with the new one.
+   * **If using Git:** Open Command Prompt, navigate to `C:\Users\leco\Documents\Pycnometer\upload-he-data`, and run `git pull`.
+3. Double-click your **Start_Sorter.bat** to restart the background script with the new code.
