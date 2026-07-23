@@ -16,7 +16,8 @@ RAW_ONEDRIVE = os.getenv("ONEDRIVE_DIRECTORY", "") #pulls path from env
 WATCH_DIRECTORY = RAW_WATCH.format(USERNAME=USERNAME) #resolves username placeholder if present
 ONEDRIVE_DIRECTORY = RAW_ONEDRIVE.format(USERNAME=USERNAME) #resolves username placeholder if present
 
-WN_PATTERN = re.compile(r"WN\d{3}", re.IGNORECASE) #matches wn followed by exactly 3 digits like wn101 or WN999
+# UPDATE: Removed the ^ so it searches for WNxyz ANYWHERE in the filename
+WN_PATTERN = re.compile(r"WN\d{3}", re.IGNORECASE) 
 
 
 def wait_for_file_completion(file_path, timeout=30): #holds off moving file while lab equipment writes data
@@ -62,11 +63,20 @@ class LabDataHandler(FileSystemEventHandler): #event handler class triggered on 
                 os.makedirs(target_folder) #create subfolder if missing
                 print(f"[CREATED FOLDER] {target_folder}")
 
-            destination_path = os.path.join(target_folder, file_name) #full target path for file
+            # OVERWRITE CHECK: Prevents deleting existing files with the same name
+            base_name, extension = os.path.splitext(file_name)
+            destination_path = os.path.join(target_folder, file_name)
+            
+            counter = 1
+            while os.path.exists(destination_path): # Check if file already exists in target folder
+                new_name = f"{base_name}_{counter}{extension}" # Append _1, _2, etc.
+                destination_path = os.path.join(target_folder, new_name)
+                counter += 1
 
             try:
                 shutil.move(file_path, destination_path) #move file from incoming to sharepoint
-                print(f"[MOVED] '{file_name}' -> '{wn_code}' folder")
+                final_name = os.path.basename(destination_path)
+                print(f"[MOVED] '{file_name}' -> '{wn_code}\{final_name}'")
             except Exception as e:
                 print(f"[ERROR] Failed to move '{file_name}': {e}")
         else:

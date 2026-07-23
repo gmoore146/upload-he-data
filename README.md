@@ -62,3 +62,32 @@ To run the script quietly in the background when the PC powers on:
    * **Add arguments:** `run pythonw -m upload_he_data.main`
    * **Start in:** `C:\path\to\upload-he-data`
 6. Click **Finish**.
+
+## Stopping the Service
+
+If you need to stop the background script (for troubleshooting or updates):
+1. Press `Ctrl + Shift + Esc` to open **Task Manager**.
+2. Go to the **Details** tab.
+3. Find `pythonw.exe`, right-click it, and select **End Task**.
+*(Note: To prevent it from starting automatically again, disable it in Task Scheduler).*
+
+## Updating the Script
+
+When new changes are made to the code on GitHub, follow these steps on the lab PC to update:
+
+1. Open Command Prompt and navigate to the project folder:
+```cmd
+cd C:\path\to\upload-he-data
+```
+
+2. Download the latest code:
+```cmd
+git pull
+```
+
+3. Sync any new dependencies:
+```cmd
+uv sync
+```
+
+4. Restart the PC to automatically launch the updated background script.
