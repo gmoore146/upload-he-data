@@ -16,10 +16,7 @@ RAW_ONEDRIVE = os.getenv("ONEDRIVE_DIRECTORY", "")
 WATCH_DIRECTORY = RAW_WATCH.format(USERNAME=USERNAME) 
 ONEDRIVE_DIRECTORY = RAW_ONEDRIVE.format(USERNAME=USERNAME) 
 
-# Pattern for WNxyz
 WN_PATTERN = re.compile(r"WN\d{3}", re.IGNORECASE) 
-
-# Pattern for G400 variations followed by a dash and exactly 2 digits (e.g., -01)
 G400_PATTERN = re.compile(r"(G400Plus|G400\+|G\+)-(\d{2})", re.IGNORECASE)
 
 def wait_for_file_completion(file_path, timeout=30): 
@@ -54,7 +51,6 @@ class LabDataHandler(FileSystemEventHandler):
             print(f"[WARNING] Could not access '{file_name}' (file write timeout).")
             return
 
-        # Check which naming pattern the file matches
         wn_match = WN_PATTERN.search(file_name)
         g400_match = G400_PATTERN.search(file_name)
 
@@ -64,9 +60,8 @@ class LabDataHandler(FileSystemEventHandler):
             print_path = folder_name
             
         elif g400_match:
-            digits = g400_match.group(2) # Gets the 'xy' number
+            digits = g400_match.group(2) 
             folder_name = f"G400+-{digits}"
-            # Routes to: Raw Data Files \ G400+ \ G400+-xy
             target_folder = os.path.join(ONEDRIVE_DIRECTORY, "G400+", folder_name)
             print_path = f"G400+\\{folder_name}"
             
@@ -90,7 +85,6 @@ class LabDataHandler(FileSystemEventHandler):
         try:
             shutil.move(file_path, destination_path) 
             final_name = os.path.basename(destination_path)
-            # Using double backslash to fix that previous SyntaxWarning
             print(f"[MOVED] '{file_name}' -> '{print_path}\\{final_name}'")
         except Exception as e:
             print(f"[ERROR] Failed to move '{file_name}': {e}")
