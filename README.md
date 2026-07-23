@@ -5,6 +5,7 @@ Automated background service to monitor incoming He Pycnometer lab outputs and o
 ## Requirements
 
 - Requires OneDrive to be synced to the lab PC in files.
+- Requires UV to be installed on the lab PC
 
 ## Setup Instructions
 
