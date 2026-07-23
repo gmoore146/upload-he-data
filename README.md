@@ -2,20 +2,9 @@
 
 Automated background service to monitor incoming He Pycnometer lab outputs and organise them into dedicated `WNxyz` subfolders within SharePoint/OneDrive.
 
-## Repository Layout
+## Requirements
 
-```text
-upload-he-data/
-├── .env                  <-- [LOCAL ONLY] Local PC folder paths
-├── .env.example          <-- Template for paths configuration
-├── .gitignore            <-- Excludes secrets and temporary files from Git
-├── pyproject.toml        <-- Project dependencies and script runner setup
-├── README.md             <-- Setup documentation
-└── src/
-    └── upload_he_data/
-        ├── __init__.py   <-- Package initializer
-        └── main.py       <-- File system monitoring & file-sorting logic
-```
+- Requires OneDrive to be synced to the lab PC in files.
 
 ## Setup Instructions
 
@@ -31,10 +20,10 @@ Create your local `.env` file from the example template:
 ```cmd
 copy .env.example .env
 ```
-Open `.env` in Notepad and set your local directory paths:
+Open `.env` in Notepad and set your local directory paths to match the lab PC:
 ```bash
-WATCH_DIRECTORY="C:\LabOutputs\Incoming"
-ONEDRIVE_DIRECTORY="C:\Users\{USERNAME}\Puraffinity\Puraffinity - Documents\General\Analytical\Internal Testing\He Pycnometer\Raw Data Files"
+WATCH_DIRECTORY="C:\Path\To\Your\Incoming\Folder"
+ONEDRIVE_DIRECTORY="C:\Path\To\Your\OneDrive\Folder"
 ```
 
 ### 3. Install Dependencies
