@@ -67,79 +67,96 @@ def get_unique_destination(target_folder, file_name):
         
     return os.path.abspath(destination_path)
 
+# Main logic for sorting a single file
+def process_file(file_path):
+    file_name = os.path.basename(file_path) 
+
+    if file_name.startswith("~") or file_name.endswith(".tmp"): 
+        return
+
+    if not wait_for_file_completion(file_path): 
+        logging.warning(f"Could not access '{file_path}' (file write timeout).")
+        return
+
+    wn_match = WN_PATTERN.search(file_name)
+    g400_match = G400_PATTERN.search(file_name)
+
+    # Determine target folders based on regex matches
+    if wn_match:
+        folder_name = wn_match.group(0).upper() 
+        onedrive_target = os.path.abspath(os.path.join(ONEDRIVE_DIRECTORY, folder_name))
+        processed_target = os.path.abspath(os.path.join(PROCESSED_DIRECTORY, folder_name))
+        
+    elif g400_match:
+        digits = g400_match.group(2) 
+        folder_name = f"G400+-{digits}"
+        onedrive_target = os.path.abspath(os.path.join(ONEDRIVE_DIRECTORY, "G400+", folder_name))
+        processed_target = os.path.abspath(os.path.join(PROCESSED_DIRECTORY, "G400+", folder_name))
+        
+    else:
+        logging.info(f"[SKIPPED] '{file_path}' — No WNxyz or G400+-xy code detected.") 
+        return
+
+    # Ensure both target directories exist
+    for target_folder in [onedrive_target, processed_target]:
+        if not os.path.exists(target_folder): 
+            os.makedirs(target_folder) 
+            logging.info(f"[CREATED FOLDER] {target_folder}")
+
+    # Get unique file paths for both destinations
+    onedrive_dest = get_unique_destination(onedrive_target, file_name)
+    processed_dest = get_unique_destination(processed_target, file_name)
+
+    try:
+        # 1. Copy to local Processed folder
+        shutil.copy2(file_path, processed_dest)
+        
+        # 2. Move to OneDrive (this removes the original from Watch folder)
+        shutil.move(file_path, onedrive_dest) 
+        
+        logging.info(
+            f"[SUCCESS] '{file_path}' saved to both:\n"
+            f"   -> OneDrive: {onedrive_dest}\n"
+            f"   -> Local: {processed_dest}"
+        )
+    except Exception as e:
+        logging.error(f"[ERROR] Failed to process '{file_path}': {e}")
+
 class LabDataHandler(FileSystemEventHandler): 
     def on_created(self, event): 
         if event.is_directory: 
             return
-
-        file_path = os.path.abspath(event.src_path)
-        file_name = os.path.basename(file_path) 
-
-        if file_name.startswith("~") or file_name.endswith(".tmp"): 
-            return
-
-        if not wait_for_file_completion(file_path): 
-            logging.warning(f"Could not access '{file_path}' (file write timeout).")
-            return
-
-        wn_match = WN_PATTERN.search(file_name)
-        g400_match = G400_PATTERN.search(file_name)
-
-        # Determine target folders based on regex matches
-        if wn_match:
-            folder_name = wn_match.group(0).upper() 
-            onedrive_target = os.path.abspath(os.path.join(ONEDRIVE_DIRECTORY, folder_name))
-            processed_target = os.path.abspath(os.path.join(PROCESSED_DIRECTORY, folder_name))
-            
-        elif g400_match:
-            digits = g400_match.group(2) 
-            folder_name = f"G400+-{digits}"
-            onedrive_target = os.path.abspath(os.path.join(ONEDRIVE_DIRECTORY, "G400+", folder_name))
-            processed_target = os.path.abspath(os.path.join(PROCESSED_DIRECTORY, "G400+", folder_name))
-            
-        else:
-            logging.info(f"[SKIPPED] '{file_path}' — No WNxyz or G400+-xy code detected.") 
-            return
-
-        # Ensure both target directories exist
-        for target_folder in [onedrive_target, processed_target]:
-            if not os.path.exists(target_folder): 
-                os.makedirs(target_folder) 
-                logging.info(f"[CREATED FOLDER] {target_folder}")
-
-        # Get unique file paths for both destinations
-        onedrive_dest = get_unique_destination(onedrive_target, file_name)
-        processed_dest = get_unique_destination(processed_target, file_name)
-
-        try:
-            # 1. Copy to local Processed folder
-            shutil.copy2(file_path, processed_dest)
-            
-            # 2. Move to OneDrive (this removes the original from Watch folder)
-            shutil.move(file_path, onedrive_dest) 
-            
-            logging.info(
-                f"[SUCCESS] '{file_path}' saved to both:\n"
-                f"   -> OneDrive: {onedrive_dest}\n"
-                f"   -> Local: {processed_dest}"
-            )
-        except Exception as e:
-            logging.error(f"[ERROR] Failed to process '{file_path}': {e}")
+        
+        # Pass the new file to our processor
+        process_file(os.path.abspath(event.src_path))
 
 def run(): 
     if not ONEDRIVE_DIRECTORY: 
         raise ValueError("ONEDRIVE_DIRECTORY is not set in environment variables or .env file.")
 
-    event_handler = LabDataHandler() 
-    observer = Observer() 
-    
-    observer.schedule(event_handler, path=WATCH_DIRECTORY, recursive=False) 
+    # Ensure the watch directory exists before trying to scan it
+    if not os.path.exists(WATCH_DIRECTORY):
+        os.makedirs(WATCH_DIRECTORY)
+        logging.info(f"Created Watch Directory: {WATCH_DIRECTORY}")
 
-    logging.info("--- He Pycnometer Auto-Sorter Active ---")
+    logging.info("--- He Pycnometer Auto-Sorter Starting ---")
     logging.info(f"Monitoring: {WATCH_DIRECTORY}")
     logging.info(f"OneDrive Destination: {ONEDRIVE_DIRECTORY}")
     logging.info(f"Local Processed Destination: {PROCESSED_DIRECTORY}\n")
 
+    # --- INITIAL SCAN ---
+    logging.info("Scanning for existing files in the incoming directory...")
+    for file_name in os.listdir(WATCH_DIRECTORY):
+        file_path = os.path.join(WATCH_DIRECTORY, file_name)
+        if os.path.isfile(file_path):
+            process_file(file_path)
+    logging.info("Initial scan complete. Beginning real-time monitoring.\n")
+
+    # --- REAL-TIME MONITORING ---
+    event_handler = LabDataHandler() 
+    observer = Observer() 
+    
+    observer.schedule(event_handler, path=WATCH_DIRECTORY, recursive=False) 
     observer.start() 
 
     try:
