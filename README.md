@@ -19,21 +19,21 @@ Automated background service to monitor incoming He Pycnometer lab outputs and o
 1. Open a web browser on the lab PC and go to: `https://github.com/gmoore146/upload-he-data`
 2. Click the green **Code** button and select **Download ZIP**.
 3. Extract the downloaded ZIP file.
-4. Move the extracted files to create the folder: `C:\Users\leco\Documents\Pycnometer\upload-he-data`.
+4. Move the extracted files to create the folder: `%USERPROFILE%\Documents\Pycnometer\upload-he-data`.
 5. Open Command Prompt and navigate to the folder:
 ```cmd
-cd C:\Users\leco\Documents\Pycnometer\upload-he-data
+cd %USERPROFILE%\Documents\Pycnometer\upload-he-data
 ```
 
 **Option B: Using Git**
 Open Command Prompt and clone the project to the lab PC:
 ```cmd
-cd C:\Users\leco\Documents\Pycnometer
-git clone [https://github.com/gmoore146/upload-he-data.git](https://github.com/gmoore146/upload-he-data.git) upload-he-data
+cd %USERPROFILE%\Documents\Pycnometer
+git clone https://github.com/gmoore146/upload-he-data.git upload-he-data
 cd upload-he-data
 ```
 
-*(Note: We run this as a standalone script using `uv`'s inline dependencies, so running `uv sync` or building a virtual environment is not required).*
+*(Note: the start command passes dependencies with `uv run --with`, so running `uv sync` or building a virtual environment is not required).*
 
 ### 2. Configure Local Environment Variables
 Create your local `.env` file from the example template:
@@ -42,8 +42,8 @@ copy .env.example .env
 ```
 Open `.env` in Notepad and set your local directory paths to match the lab PC:
 ```bash
-WATCH_DIRECTORY="C:\Users\leco\Documents\Pycnometer\Incoming"
-ONEDRIVE_DIRECTORY="C:\Users\leco\OneDrive - Puraffinity\Puraffinity - He Pycnometer\Raw Data Files"
+WATCH_DIRECTORY="C:\Users\<USER>\Documents\Pycnometer\Incoming"
+ONEDRIVE_DIRECTORY="C:\Users\<USER>\OneDrive - <Organisation>\He Pycnometer\Raw Data Files"
 ```
 
 ### 3. Setup Desktop Controls (Start/Stop Buttons)
@@ -51,8 +51,8 @@ Create two `.bat` files on the Desktop to easily start and stop the script witho
 
 **Start_Sorter.bat**
 ```cmd
-cd C:\Users\leco\Documents\Pycnometer\upload-he-data
-C:\Users\leco\.local\bin\uv.exe run --with watchdog --with python-dotenv pythonw main.py
+cd %USERPROFILE%\Documents\Pycnometer\upload-he-data
+%USERPROFILE%\.local\bin\uv.exe run --with watchdog --with python-dotenv pythonw main.py
 ```
 
 **Stop_Sorter.bat**
@@ -70,9 +70,9 @@ To run the script quietly in the background every time the PC is logged into:
 3. Set **Name** to `He Pycnometer Auto Sorter`.
 4. Set **Trigger** to `When I log on`.
 5. Set **Action** to `Start a program`:
-   * **Program/script:** `C:\Users\leco\.local\bin\uv.exe`
+   * **Program/script:** `%USERPROFILE%\.local\bin\uv.exe`
    * **Add arguments:** `run --with watchdog --with python-dotenv pythonw main.py`
-   * **Start in:** `C:\Users\leco\Documents\Pycnometer\upload-he-data`
+   * **Start in:** `%USERPROFILE%\Documents\Pycnometer\upload-he-data`
 6. Click **Finish**.
 
 ## Updating the Script
@@ -82,5 +82,5 @@ When new changes are made to the code on GitHub, follow these steps on the lab P
 1. Double-click your **Stop_Sorter.bat** on the desktop to kill the current background process.
 2. Update the files:
    * **If using Manual Download:** Download the new ZIP from `https://github.com/gmoore146/upload-he-data`, extract it, and replace the old `main.py` with the new one.
-   * **If using Git:** Open Command Prompt, navigate to `C:\Users\leco\Documents\Pycnometer\upload-he-data`, and run `git pull`.
+   * **If using Git:** Open Command Prompt, navigate to `%USERPROFILE%\Documents\Pycnometer\upload-he-data`, and run `git pull`.
 3. Double-click your **Start_Sorter.bat** to restart the background script with the new code.

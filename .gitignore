@@ -25,3 +25,5 @@ Desktop.ini
 
 # MAC files
 .DS_Store
+# Script log
+he_sorter_log.txt
